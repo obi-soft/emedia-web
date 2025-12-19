@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>News</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+<section style="padding:16px">
+  <h3>Create post</h3>
+  <div class="input-group"><input id="postTitle" placeholder="Title"></div>
+  <div class="input-group"><textarea id="postBody" rows="4" placeholder="Write your story" style="resize:none;border:0;background:transparent;width:100%"></textarea></div>
+  <div class="input-group"><input id="postTags" placeholder="Tags (comma separated)"></div>
+  <div class="input-group"><input type="file" id="postImage" accept="image/*"></div>
+  <button id="publishBtn" class="btn primary">Publish</button>
+</section>
+
+<section style="padding:16px">
+  <h3>Posts</h3>
+  <div id="postsList" style="display:grid;gap:12px"></div>
+</section>
+
+<!-- floating login button for webview (shows when not logged in) -->
+<button id="floatingLogin" class="floating-login" style="display:none" onclick="location.href='index.html'">
+  <span class="material-icons">login</span>
+  <span>Login</span>
+</button>
+
+<div class="bottom-nav">
+  <button class="nav-item" onclick="location.href='home.html'"><span class="material-icons">home</span><span>Home</span></button>
+  <button class="nav-item" onclick="location.href='chat.html'"><span class="material-icons">chat</span><span>Chat</span></button>
+  <button class="nav-item" onclick="location.href='profile.html'"><span class="material-icons">person</span><span>Profile</span></button>
+</div>
+
+<script type="module" src="js/news.js"></script>
+<script>
+// show login button only when no user/token in storage
+(function(){
+  try{
+    const logged = !!(localStorage.getItem('user')||localStorage.getItem('token'));
+    const btn = document.getElementById('floatingLogin');
+    if(btn) btn.style.display = logged ? 'none' : 'flex';
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

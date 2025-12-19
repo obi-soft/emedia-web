@@ -2,33 +2,115 @@
 <html>
 <head>
 <title>Dashboard</title>
-<link rel="stylesheet" href="css/style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
 
+<!-- <div class="app-bar">
+  <button class="icon-btn" aria-label="menu"><span class="material-icons">menu</span></button>
+  <div class="app-title">
+    <div class="app-brand" style="margin:0">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="2" y="3" width="20" height="14" rx="3" fill="#1976d2"/>
+        <path d="M4 17c0 1.1.9 2 2 2h12v1a1 1 0 0 1-1 1H5a2 2 0 0 1-1-3.732V17z" fill="#0b3a66"/>
+        <circle cx="17.5" cy="6.5" r="1.5" fill="#fff"/>
+      </svg>
+      <span style="margin-left:8px">eMedia</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <img id="topAvatar" src="" alt="avatar" style="width:36px;height:36px;border-radius:8px;object-fit:cover;display:none">
+    <button class="icon-btn" title="Notifications"><span class="material-icons">notifications</span></button>
+    <button class="icon-btn" title="Logout" onclick="logout()"><span class="material-icons">logout</span></button>
+  </div>
+</div> -->
 
-<div class="welcome">
-<h3 id="username">Welcome</h3>
-<p id="email"></p>
-</div>
+<section class="welcome">
+  <h3 id="username">Welcome</h3>
+  <p id="email"></p>
+  <div style="display:flex;gap:8px;align-items:center">
+    <img id="topAvatar" src="" alt="avatar" style="width:36px;height:36px;border-radius:8px;object-fit:cover;display:none">
+    <button class="icon-btn" title="Notifications"><span class="material-icons">notifications</span></button>
+    <button class="icon-btn" title="Logout" onclick="logout()"><span class="material-icons">logout</span></button>
+  </div>
+</section>
 
+<section class="featured" aria-label="Featured">
+  <div class="featured-card">
+    <div class="featured-content">
+      <div class="featured-title">Top story</div>
+      <div class="featured-sub">Breaking: New features launched on eMedia</div>
+    </div>
+    <button class="btn" onclick="location.href='news.html'">Read</button>
+  </div>
+</section>
 
-<div class="grid">
-<div class="card">News</div>
-<div class="card">Services</div>
-<div class="card">Chat</div>
-<div class="card">Contact Us</div>
-<div class="card">About Us</div>
-</div>
-
+<section class="grid" aria-label="Quick Actions">
+  <a class="card" href="news.html"><span class="material-icons large">feed</span><div class="card-label">News</div></a>
+  <a class="card" href="services.html"><span class="material-icons large">build</span><div class="card-label">Services</div></a>
+  <a class="card" href="chat.html"><span class="material-icons large">chat</span><div class="card-label">Chat</div></a>
+  <a class="card" href="contact.html"><span class="material-icons large">contact_mail</span><div class="card-label">Contact</div></a>
+  <a class="card" href="about.html"><span class="material-icons large">info</span><div class="card-label">About</div></a>
+  <a class="card" href="profile.html"><span class="material-icons large">person</span><div class="card-label">Profile</div></a>
+</section>
 
 <div class="bottom-nav">
-<span>Home</span>
-<span>Chat</span>
-<span>Profile</span>
+  <button class="nav-item" onclick="safeNavigate('home.html')"><span class="material-icons">home</span><span>Home</span></button>
+  <button class="nav-item" onclick="safeNavigate('chat.html')"><span class="material-icons">chat</span><span>Chat</span></button>
+  <button class="nav-item" onclick="safeNavigate('profile.html')"><span class="material-icons">person</span><span>Profile</span></button>
 </div>
 
+<script type="module" src="js/home.js?v=2"></script>
+<script>
+function logout(){
+  try{localStorage.removeItem('user');localStorage.removeItem('token');}catch(e){}
+  window.location.href = 'index.html';
+}
 
-<script type="module" src="js/home.js"></script>
+// populate user info from localStorage as fallback
+(function(){
+  try{
+    const raw = localStorage.getItem('user');
+    if(raw){
+      const u = JSON.parse(raw);
+      if(u.username) document.getElementById('username').innerText = 'Welcome ' + u.username;
+      if(u.email) document.getElementById('email').innerText = u.email;
+      if(u.avatarFileName){
+        // if avatar was saved as URL in future, set it. we only have filename now
+        const top = document.getElementById('topAvatar');
+        top.src = '';
+        top.style.display = 'none';
+      }
+    }
+  }catch(e){}
+})();
+
+// Prevent reloading the same page from bottom nav (fixes refresh loop)
+function safeNavigate(target){
+  try{
+    const current = window.location.pathname.split('/').pop() || 'home.html';
+    const normalizedTarget = (new URL(target, window.location.href)).pathname.split('/').pop();
+    if(current === normalizedTarget){
+      // already on target — do nothing
+      return;
+    }
+  }catch(e){ /* ignore and navigate */ }
+  window.location.href = target;
+}
+
+// highlight active bottom nav item
+(function(){
+  try{
+    const current = window.location.pathname.split('/').pop() || 'home.html';
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(btn=>{
+      const onclick = btn.getAttribute('onclick') || '';
+      if(onclick.indexOf(current) !== -1){ btn.style.opacity = '1'; btn.style.fontWeight = '700'; }
+    });
+  }catch(e){}
+})();
+</script>
 </body>
 </html>

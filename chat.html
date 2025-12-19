@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+<div class="app-bar">
+  <button class="icon-btn" aria-label="back" onclick="history.back()"><span class="material-icons">arrow_back</span></button>
+  <div class="app-title">Chat</div>
+  <div style="width:44px"></div>
+</div>
+
+<section class="chat-area" style="padding:12px;display:flex;flex-direction:column;height:calc(100vh - 160px)">
+  <div id="messages" class="messages" style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:6px">
+    <!-- messages appended here -->
+  </div>
+
+  <div class="chat-input" style="margin-top:8px;display:flex;gap:8px;align-items:center">
+    <input id="msgText" placeholder="Ask a question or start a conversation" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:#fff">
+    <input id="msgFile" type="file" style="display:none">
+    <button id="attachBtn" class="icon-btn" title="Attach"><span class="material-icons">attach_file</span></button>
+    <button id="sendBtn" class="btn primary">Send</button>
+  </div>
+</section>
+
+<div class="bottom-nav">
+  <button class="nav-item" onclick="location.href='home.html'"><span class="material-icons">home</span><span>Home</span></button>
+  <button class="nav-item" onclick="location.href='chat.html'"><span class="material-icons">chat</span><span>Chat</span></button>
+  <button class="nav-item" onclick="location.href='profile.html'"><span class="material-icons">person</span><span>Profile</span></button>
+</div>
+
+<script type="module" src="js/chat.js"></script>
+</body>
+</html>

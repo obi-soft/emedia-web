@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+<div class="app-bar">
+  <button class="icon-btn" aria-label="back" onclick="history.back()"><span class="material-icons">arrow_back</span></button>
+  <div class="app-title">Profile</div>
+  <div style="width:44px"></div>
+</div>
+
+<section style="padding:16px">
+  <h3 id="pName">User</h3>
+  <p id="pEmail"></p>
+  <div style="margin-top:12px">
+    <button class="btn">Edit Profile</button>
+  </div>
+</section>
+
+<div class="bottom-nav">
+  <button class="nav-item" onclick="location.href='home.html'"><span class="material-icons">home</span><span>Home</span></button>
+  <button class="nav-item" onclick="location.href='chat.html'"><span class="material-icons">chat</span><span>Chat</span></button>
+  <button class="nav-item" onclick="location.href='profile.html'"><span class="material-icons">person</span><span>Profile</span></button>
+</div>
+
+<script>
+(function(){
+  try{
+    const raw = localStorage.getItem('user');
+    if(raw){const u=JSON.parse(raw);document.getElementById('pName').innerText = u.username||'User';document.getElementById('pEmail').innerText = u.email||'';}
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
