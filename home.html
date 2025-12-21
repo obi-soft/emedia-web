@@ -9,8 +9,13 @@
 </head>
 <body>
 
-<!-- <div class="app-bar">
-  <button class="icon-btn" aria-label="menu"><span class="material-icons">menu</span></button>
+<div class="app-bar">
+  <div style="display:flex;gap:8px;align-items:center">
+    <img id="topAvatar" src="" alt="avatar" style="width:36px;height:36px;border-radius:8px;object-fit:cover;display:none">
+    <button id="menuBtn" class="icon-btn" aria-label="menu" type="button"><span class="material-icons">menu</span></button>
+    <button class="icon-btn" title="Notifications"><span class="material-icons">notifications</span></button>
+    <button class="icon-btn" title="Logout" onclick="logout()"><span class="material-icons">logout</span></button>
+  </div>
   <div class="app-title">
     <div class="app-brand" style="margin:0">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -21,20 +26,14 @@
       <span style="margin-left:8px">eMedia</span>
     </div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center">
-    <img id="topAvatar" src="" alt="avatar" style="width:36px;height:36px;border-radius:8px;object-fit:cover;display:none">
-    <button class="icon-btn" title="Notifications"><span class="material-icons">notifications</span></button>
-    <button class="icon-btn" title="Logout" onclick="logout()"><span class="material-icons">logout</span></button>
-  </div>
-</div> -->
+</div>
 
 <section class="welcome">
   <h3 id="username">Welcome</h3>
   <p id="email"></p>
   <div style="display:flex;gap:8px;align-items:center">
-    <img id="topAvatar" src="" alt="avatar" style="width:36px;height:36px;border-radius:8px;object-fit:cover;display:none">
-    <button class="icon-btn" title="Notifications"><span class="material-icons">notifications</span></button>
-    <button class="icon-btn" title="Logout" onclick="logout()"><span class="material-icons">logout</span></button>
+    <img id="topAvatarSmall" src="" alt="avatar" style="width:36px;height:36px;border-radius:8px;object-fit:cover;display:none">
+    <div id="userLocation" style="font-size:13px;color:#566; margin-left:8px"></div>
   </div>
 </section>
 
@@ -42,14 +41,15 @@
   <div class="featured-card">
     <div class="featured-content">
       <div class="featured-title">Top story</div>
-      <div class="featured-sub">Breaking: New features launched on eMedia</div>
+      <div class="featured-sub" id="topStory">Loading...</div>
     </div>
     <button class="btn" onclick="location.href='news.html'">Read</button>
   </div>
 </section>
 
+<!-- restore quick actions grid -->
 <section class="grid" aria-label="Quick Actions">
-  <a class="card" href="news.html"><span class="material-icons large">feed</span><div class="card-label">News</div></a>
+  <a class="card" href="blogs.html"><span class="material-icons large">feed</span><div class="card-label">News</div></a>
   <a class="card" href="services.html"><span class="material-icons large">build</span><div class="card-label">Services</div></a>
   <a class="card" href="chat.html"><span class="material-icons large">chat</span><div class="card-label">Chat</div></a>
   <a class="card" href="contact.html"><span class="material-icons large">contact_mail</span><div class="card-label">Contact</div></a>
@@ -57,12 +57,31 @@
   <a class="card" href="profile.html"><span class="material-icons large">person</span><div class="card-label">Profile</div></a>
 </section>
 
-<div class="bottom-nav">
-  <button class="nav-item" onclick="safeNavigate('home.html')"><span class="material-icons">home</span><span>Home</span></button>
-  <button class="nav-item" onclick="safeNavigate('chat.html')"><span class="material-icons">chat</span><span>Chat</span></button>
-  <button class="nav-item" onclick="safeNavigate('profile.html')"><span class="material-icons">person</span><span>Profile</span></button>
+<section style="padding:16px">
+  <h3>Recent posts</h3>
+  <div id="postsList" style="display:grid;gap:12px"></div>
+</section>
+
+<!-- side menu and overlay (inserted) -->
+<div id="overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:900"></div>
+<div id="sideMenu" aria-hidden="true" style="display:none;position:fixed;left:0;top:0;height:100%;width:260px;background:#fff;box-shadow:2px 0 8px rgba(0,0,0,0.15);z-index:1000;padding:16px;">
+  <button id="sideClose" type="button" class="icon-btn" aria-label="close" style="float:right"><span class="material-icons">close</span></button>
+  <h3 style="margin-top:6px">Menu</h3>
+  <nav style="margin-top:16px;line-height:1.8">
+    <a href="home.html" onclick="safeNavigate('home.html')">Home</a><br>
+    <a href="news.html">News</a><br>
+    <a href="services.html">Services</a><br>
+    <a href="profile.html">Profile</a><br>
+  </nav>
 </div>
 
+<div class="bottom-nav">
+  <button type="button" class="nav-item" onclick="safeNavigate('home.html')"><span class="material-icons">home</span><span>Home</span></button>
+  <button type="button" class="nav-item" onclick="safeNavigate('chat.html')"><span class="material-icons">chat</span><span>Chat</span></button>
+  <button type="button" class="nav-item" onclick="safeNavigate('profile.html')"><span class="material-icons">person</span><span>Profile</span></button>
+</div>
+
+<!-- replace inline script with improved version -->
 <script type="module" src="js/home.js?v=2"></script>
 <script>
 function logout(){
@@ -78,21 +97,103 @@ function logout(){
       const u = JSON.parse(raw);
       if(u.username) document.getElementById('username').innerText = 'Welcome ' + u.username;
       if(u.email) document.getElementById('email').innerText = u.email;
-      if(u.avatarFileName){
-        // if avatar was saved as URL in future, set it. we only have filename now
-        const top = document.getElementById('topAvatar');
-        top.src = '';
-        top.style.display = 'none';
+      if(u.location) document.getElementById('userLocation').innerText = u.location;
+      const top = document.getElementById('topAvatar');
+      const topSmall = document.getElementById('topAvatarSmall');
+      const avatar = u.avatarUrl || u.avatarFileName || '';
+      if(avatar){
+        // if avatar looks like data URL or external path, use it
+        if(top){ top.src = avatar; top.style.display = 'block'; }
+        if(topSmall){ topSmall.src = avatar; topSmall.style.display = 'block'; }
       }
     }
   }catch(e){}
 })();
 
+// Render posts (used by firebase listener or fallback)
+function renderPosts(posts){
+  const list = document.getElementById('postsList');
+  if(!list) return;
+  list.innerHTML = '';
+  if(!posts || posts.length===0){ list.innerHTML = '<div class="muted">No posts yet</div>'; return; }
+  posts.forEach((p, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'card';
+    const id = p.id || p._id || ('local-' + (p.createdAt || Date.now()) + '-' + idx);
+    const img = p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;height:150px;object-fit:cover;border-radius:6px;margin-bottom:8px">` : '';
+    const content = `${img}<div style="font-weight:600">${escapeHtml(p.title || 'Untitled')}</div><div class="muted" style="font-size:13px">${escapeHtml(p.body||'')}</div>`;
+    const a = document.createElement('a');
+    a.href = 'post.html?id=' + encodeURIComponent(id);
+    a.style = 'color:inherit;text-decoration:none;display:block';
+    a.innerHTML = content;
+    el.appendChild(a);
+    list.appendChild(el);
+  });
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
+
+// Try to load posts from Firebase; if not configured, use localStorage
+(async function loadPosts(){
+  try{
+    // dynamic import of firebase only if config provided
+    const cfg = window.FIREBASE_CONFIG || {};
+    if(cfg && cfg.apiKey && cfg.apiKey !== 'REPLACE_ME'){
+      const [{ initializeApp }, { getFirestore, collection, query, orderBy, limit, onSnapshot, getDocs } ] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js')
+      ]);
+      const app = initializeApp(cfg);
+      const db = getFirestore(app);
+      const q = query(collection(db,'posts'), orderBy('createdAt','desc'), limit(20));
+      onSnapshot(q, snap=>{
+        const arr = [];
+        snap.forEach(doc=> arr.push(Object.assign({ id: doc.id }, doc.data())));
+        renderPosts(arr);
+        if(arr.length) document.getElementById('topStory').innerText = arr[0].title || 'Top story';
+      });
+      return;
+    }
+  }catch(e){ console.warn('Firebase not available or misconfigured', e); }
+
+  // fallback: load from localStorage
+  try{
+    const raw = localStorage.getItem('posts');
+    const posts = raw ? JSON.parse(raw) : [];
+    renderPosts(posts.reverse());
+    if(posts && posts.length) document.getElementById('topStory').innerText = posts[posts.length-1].title || 'Top story';
+  }catch(e){ console.warn(e); }
+})();
+
+// side menu toggle & accessibility
+(function(){
+  const menuBtn = document.getElementById('menuBtn');
+  const sideMenu = document.getElementById('sideMenu');
+  const overlay = document.getElementById('overlay');
+  const sideClose = document.getElementById('sideClose');
+
+  function openMenu(){
+    if(sideMenu){ sideMenu.style.display = 'block'; sideMenu.setAttribute('aria-hidden','false'); }
+    if(overlay) overlay.style.display = 'block';
+    if(menuBtn) menuBtn.setAttribute('aria-expanded','true');
+  }
+  function closeMenu(){
+    if(sideMenu){ sideMenu.style.display = 'none'; sideMenu.setAttribute('aria-hidden','true'); }
+    if(overlay) overlay.style.display = 'none';
+    if(menuBtn) menuBtn.setAttribute('aria-expanded','false');
+  }
+
+  if(menuBtn) menuBtn.addEventListener('click', function(e){ e.stopPropagation(); const expanded = menuBtn.getAttribute('aria-expanded') === 'true'; if(expanded) closeMenu(); else openMenu(); });
+  if(sideClose) sideClose.addEventListener('click', closeMenu);
+  if(overlay) overlay.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeMenu(); });
+})();
+
 // Prevent reloading the same page from bottom nav (fixes refresh loop)
 function safeNavigate(target){
   try{
-    const current = window.location.pathname.split('/').pop() || 'home.html';
-    const normalizedTarget = (new URL(target, window.location.href)).pathname.split('/').pop();
+    const current = (window.location.pathname.split('/').pop() || 'home.html').toLowerCase();
+    const normalizedTarget = ((new URL(target, window.location.href)).pathname.split('/').pop() || '').toLowerCase();
     if(current === normalizedTarget){
       // already on target — do nothing
       return;
@@ -104,9 +205,9 @@ function safeNavigate(target){
 // highlight active bottom nav item
 (function(){
   try{
-    const current = window.location.pathname.split('/').pop() || 'home.html';
+    const current = (window.location.pathname.split('/').pop() || 'home.html').toLowerCase();
     document.querySelectorAll('.bottom-nav .nav-item').forEach(btn=>{
-      const onclick = btn.getAttribute('onclick') || '';
+      const onclick = (btn.getAttribute('onclick') || '').toLowerCase();
       if(onclick.indexOf(current) !== -1){ btn.style.opacity = '1'; btn.style.fontWeight = '700'; }
     });
   }catch(e){}

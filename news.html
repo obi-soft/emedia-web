@@ -45,6 +45,102 @@
     if(btn) btn.style.display = logged ? 'none' : 'flex';
   }catch(e){}
 })();
+
+// publish post handler
+(async function(){
+  const publishBtn = document.getElementById('publishBtn');
+  const titleEl = document.getElementById('postTitle');
+  const bodyEl = document.getElementById('postBody');
+  const tagsEl = document.getElementById('postTags');
+  const imgEl = document.getElementById('postImage');
+  const postsList = document.getElementById('postsList');
+
+  function renderPosts(posts){
+    if(!postsList) return;
+    postsList.innerHTML = '';
+    if(!posts || posts.length===0){ postsList.innerHTML = '<div class="muted">No posts yet</div>'; return; }
+    posts.forEach(p=>{
+      const el = document.createElement('div'); el.className='card';
+      const img = p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;height:150px;object-fit:cover;border-radius:6px;margin-bottom:8px">` : '';
+      el.innerHTML = `${img}<div style="font-weight:600">${escapeHtml(p.title||'Untitled')}</div><div class="muted" style="font-size:13px">${escapeHtml(p.body||'')}</div>`;
+      postsList.appendChild(el);
+    });
+  }
+
+  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
+
+  // try to use firebase if configured
+  async function initFirebaseListener(){
+    try{
+      const cfg = window.FIREBASE_CONFIG || {};
+      if(cfg && cfg.apiKey && cfg.apiKey !== 'REPLACE_ME'){
+        const [{ initializeApp }, { getFirestore, collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp } , { getStorage, ref, uploadBytes, getDownloadURL } ] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js'),
+          import('https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js')
+        ]);
+        const app = initializeApp(cfg);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const q = query(collection(db,'posts'), orderBy('createdAt','desc'), limit(50));
+        onSnapshot(q, snap=>{
+          const arr=[]; snap.forEach(d=> arr.push(Object.assign({ id:d.id }, d.data())));
+          renderPosts(arr);
+        });
+
+        publishBtn.addEventListener('click', async function(){
+          const title = (titleEl.value || '').trim();
+          const body = (bodyEl.value || '').trim();
+          const tags = (tagsEl.value || '').split(',').map(s=>s.trim()).filter(Boolean);
+          if(!title || !body){ alert('Please provide title and body'); return; }
+          publishBtn.disabled = true;
+          let imageUrl = '';
+          if(imgEl.files && imgEl.files[0]){
+            const file = imgEl.files[0];
+            const storageRef = ref(storage, 'posts/' + Date.now() + '_' + file.name);
+            await uploadBytes(storageRef, file);
+            imageUrl = await getDownloadURL(storageRef);
+          }
+          await addDoc(collection(db,'posts'), { title, body, tags, imageUrl, createdAt: serverTimestamp() });
+          titleEl.value=''; bodyEl.value=''; tagsEl.value=''; imgEl.value='';
+          publishBtn.disabled = false;
+        });
+
+        return true;
+      }
+    }catch(e){ console.warn('Firebase publish/listen failed', e); }
+    return false;
+  }
+
+  const hasFirebase = await initFirebaseListener();
+  if(!hasFirebase){
+    // fallback to localStorage
+    try{
+      const raw = localStorage.getItem('posts');
+      const posts = raw ? JSON.parse(raw) : [];
+      renderPosts(posts.reverse());
+    }catch(e){ console.warn(e); }
+
+    publishBtn.addEventListener('click', function(){
+      const title = (titleEl.value || '').trim();
+      const body = (bodyEl.value || '').trim();
+      const tags = (tagsEl.value || '').split(',').map(s=>s.trim()).filter(Boolean);
+      if(!title || !body){ alert('Please provide title and body'); return; }
+      const p = { id: 'local-'+Date.now(), title, body, tags, createdAt: Date.now() };
+      try{
+        const raw = localStorage.getItem('posts');
+        const posts = raw ? JSON.parse(raw) : [];
+        posts.push(p);
+        localStorage.setItem('posts', JSON.stringify(posts));
+      }catch(e){ }
+      // prepend to UI
+      const current = postsList.children ? Array.from(postsList.children) : [];
+      renderPosts([p].concat(current.map(n=>({title:n.querySelector('div')?.innerText||'', body:''}))));
+      titleEl.value=''; bodyEl.value=''; tagsEl.value=''; imgEl.value='';
+    });
+  }
+})();
 </script>
 </body>
 </html>
